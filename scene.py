@@ -6,11 +6,10 @@ class CreateCircle(Scene):
 	def construct(self):
 		
 		pointList = [
-			[-2,3,0],
-			[-1,1,0],
-			[1,3,0]
+			[1,-2,0],
+			[-1,0,0],
+			[1,2,0]
 		]
-
 
 		p1 = Dot(point=pointList[0], color=PINK).set_stroke(YELLOW)
 		p2 = Dot(point=pointList[1], color = GREEN).set_stroke(ORANGE)
@@ -65,7 +64,6 @@ class CreateCircle(Scene):
 			stroke_width=2)
 		p3_r.stroke_color = WHITE
 
-
 		pt_list =[
 			p3_r.get_point_mobject().points[0],
 			p2_r.get_point_mobject().points[0],
@@ -89,31 +87,22 @@ class CreateCircle(Scene):
 		self.play(creation)
 		self.wait(2)
 
-		
-		
 
 def get_two_point(p1,p2,p3,width):
-	vec12 = np.subtract(p2,p1)
-	vec32 = np.subtract(p2,p3)
-	angle = get_angle_between(vec12,vec32)
-	rotation_angle = atan2(vec12[1],vec12[0])
-	print(rotation_angle * 180 / PI)
-	half_angle = angle / 2
-
-	point1 = [
-			cos(half_angle) * width/(2*sin(half_angle)) + p2[0],
-			sin(half_angle) * width/(2*sin(half_angle)) + p2[1],
-			0
+	vec21 = np.subtract(p2,p1)
+	vec23 = np.subtract(p2,p3)
+	angle = get_angle_between(vec21,vec23)
+	if round(angle,2) == round(PI,2):
+		if 
+		return[
+			unit_vector(np.array([-vec21[1],vec21[0],vec21[2]])) * -width / 2 + p2,
+			unit_vector(np.array([-vec21[1],vec21[0],vec21[2]])) * width / 2 + p2
 		]
-	point2 = [
-			cos(half_angle) * -width/(2*sin(half_angle)) + p2[0],
-			sin(half_angle) * -width/(2*sin(half_angle)) + p2[1],
-			0
-		]
-
+	tmp = unit_vector(vec21) + unit_vector(vec23)
+	print(f"tmp: {tmp} angle:{angle*180/PI}")
 	return [
-		rotate_vector(point1,rotation_angle),
-		rotate_vector(point2,rotation_angle)
+		tmp * width / 2 + p2,
+		tmp * -width / 2 + p2
 	]
 
 def rotate_vector(vector,rotation):
@@ -147,3 +136,5 @@ def get_angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
