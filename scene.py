@@ -8,80 +8,77 @@ class CreateCircle(Scene):
 		pointList = [
 			[-3,-1,0],
 			[-1,0,0],
-			[-1,2,0]
+			[-1,2,0],
+			[1,3,0],
+			[2,1,0],
+			[1.5,-1,0],
+			[-2,-2.5,0],
+			[-4,-2,0]
 		]
 
 		p1 = Dot(point=pointList[0], color=PINK).set_stroke(YELLOW)
 		p2 = Dot(point=pointList[1], color = GREEN).set_stroke(ORANGE)
 		p3 = Dot(point=pointList[2], color = BLUE).set_stroke(WHITE)
 		
+		dots = []
+		for pt in pointList:
+			dots.append(Dot(point=pt))
+		path = []
+		width = 1
+		start = get_two_point(
+			get_inverse(pointList[0],pointList[1]),
+			pointList[0],
+			pointList[1],
+			width
+		)
+		edge_dots=[]
+		edge_dots.append([Dot(point=start[0]),Dot(point=start[1])])
+		for i in range(0,len(dots) - 1):
+			path.append(Line(dots[i],dots[i+1],color = PURPLE))
+		for i in range(0,len(pointList) - 2):
+			points = get_two_point(
+				pointList[i],
+				pointList[i+1],
+				pointList[i+2],
+				width
+			)
+			edge_dots.append([Dot(point=points[0]),Dot(point=points[1])])
+		end = get_two_point(
+			pointList[len(pointList)-2],
+			pointList[len(pointList)-1],
+			get_inverse(pointList[len(pointList) - 1],pointList[len(pointList)-2]),
+			width
+		)
+		edge_dots.append([Dot(point=end[0]),Dot(point=end[1])])
 		v1 = Line(pointList[0],pointList[1],color = PURPLE)
 		v2 = Line(pointList[1],pointList[2],color = PURPLE)
 
-		width = 1
 
-		left_right = get_two_point(
-						get_inverse(pointList[0],pointList[1]),
-						pointList[0],
-						pointList[1],
-						width)
-		p1_l = Dot(
-			point=left_right[1],
-			color=GREEN_A,
-			stroke_width=2)
-		p1_l.stroke_color = YELLOW
-		p1_r = Dot(
-			point=left_right[0],
-			color=PINK,
-			stroke_width=2)
-		p1_r.stroke_color = YELLOW
+		left,right = zip(*edge_dots)
+		new_flat = list(left) + list(right)
+		pt_list =[]
+		for itm in new_flat:
+			pt_list.append(itm.get_point_mobject().points[0])
 
-		left_right = get_two_point(pointList[0],pointList[1],pointList[2],width)
-		p2_l = Dot(
-			point=left_right[1],
-			color=GREEN_A,
-			stroke_width=2)
-		p2_l.stroke_color = ORANGE
-		p2_r = Dot(
-			point=left_right[0],
-			color=PINK,
-			stroke_width=2)
-		p2_r.stroke_color = ORANGE
-
-		left_right = get_two_point(
-						pointList[1],
-						pointList[2],
-						get_inverse(pointList[2],pointList[1]),
-						width)
-		p3_l = Dot(
-			point=left_right[1],
-			color=GREEN_A,
-			stroke_width=2)
-		p3_l.stroke_color = WHITE
-		p3_r = Dot(
-			point=left_right[0],
-			color=PINK,
-			stroke_width=2)
-		p3_r.stroke_color = WHITE
-
-		pt_list =[
-			p3_r.get_point_mobject().points[0],
-			p2_r.get_point_mobject().points[0],
-			p1_r.get_point_mobject().points[0],
-			p1_l.get_point_mobject().points[0],
-			p2_l.get_point_mobject().points[0],
-			p3_l.get_point_mobject().points[0]]
-		
 		pipe = Polygon(
 			*pt_list,
 			color = PURPLE
 		)
 		pipe.fill_color = PURPLE
 		
-		self.add(p1,p2,p3,p1_l,p1_r,p2_l,p2_r,p3_l,p3_r)
-		self.play(Create(v1))
-		self.play(Create(v2))
+		
+
+		for dot in dots:
+			self.play(Create(dot))
+		for p in path:
+			self.play(Create(p))
+			
 		self.wait(1)
+		for edge_group in edge_dots:
+			self.play(Create(
+					VGroup(*[edge_group[0],edge_group[1]])
+				)
+			)
 		creation = Create(pipe)
 		creation.set_run_time = 5.0
 		self.play(creation)
