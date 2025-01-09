@@ -6,9 +6,9 @@ class CreateCircle(Scene):
 	def construct(self):
 		
 		pointList = [
-			[1,-2,0],
+			[-3,-1,0],
 			[-1,0,0],
-			[1,2,0]
+			[-1,2,0]
 		]
 
 		p1 = Dot(point=pointList[0], color=PINK).set_stroke(YELLOW)
@@ -93,16 +93,27 @@ def get_two_point(p1,p2,p3,width):
 	vec23 = np.subtract(p2,p3)
 	angle = get_angle_between(vec21,vec23)
 	if round(angle,2) == round(PI,2):
-		if 
 		return[
 			unit_vector(np.array([-vec21[1],vec21[0],vec21[2]])) * -width / 2 + p2,
 			unit_vector(np.array([-vec21[1],vec21[0],vec21[2]])) * width / 2 + p2
 		]
 	tmp = unit_vector(vec21) + unit_vector(vec23)
-	print(f"tmp: {tmp} angle:{angle*180/PI}")
+	
+	angle23 = atan2(vec21[1],vec21[0]) - atan2(vec23[1],vec23[0])
+	
+	#normalize within pi,-pi
+	if angle23 >= PI:
+		angle23 -= 2 * PI
+	elif angle23 <= -PI:
+		angle23 += 2 * PI
+	
+	side = 1
+	#correct for the side
+	if angle23 < 0:
+		side *= -1
 	return [
-		tmp * width / 2 + p2,
-		tmp * -width / 2 + p2
+		tmp * side * width / 2 + p2,
+		tmp * side * -width / 2 + p2
 	]
 
 def rotate_vector(vector,rotation):
