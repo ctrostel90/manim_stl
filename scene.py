@@ -1,5 +1,5 @@
 from manim import *
-from math import atan2,sin,cos
+from math import atan2,sin,cos,sqrt
 import numpy as np
 
 class CreateCircle(Scene):
@@ -7,12 +7,12 @@ class CreateCircle(Scene):
 		
 		pointList = [
 			[-3,-1,0],
-			[-1,0,0],
-			[-1,2,0],
-			[1,3,0],
-			[2,1,0],
-			[1.5,-1,0],
-			[-2,-2.5,0],
+			[-1,0,1],
+			[-1,2,2],
+			[1,3,3],
+			[2,1,1],
+			[1.5,-1,3],
+			[-2,-2.5,-1],
 			[-4,-2,0]
 		]
 
@@ -24,7 +24,7 @@ class CreateCircle(Scene):
 		for pt in pointList:
 			dots.append(Dot(point=pt))
 		path = []
-		width = 1
+		width = 1.5
 		start = get_two_point(
 			get_inverse(pointList[0],pointList[1]),
 			pointList[0],
@@ -42,6 +42,7 @@ class CreateCircle(Scene):
 				pointList[i+2],
 				width
 			)
+			print(get_distance(points[0],points[1]))
 			edge_dots.append([Dot(point=points[0]),Dot(point=points[1])])
 		end = get_two_point(
 			pointList[len(pointList)-2],
@@ -55,6 +56,7 @@ class CreateCircle(Scene):
 
 
 		left,right = zip(*edge_dots)
+		right = reversed(right)
 		new_flat = list(left) + list(right)
 		pt_list =[]
 		for itm in new_flat:
@@ -69,19 +71,16 @@ class CreateCircle(Scene):
 		
 
 		for dot in dots:
-			self.play(Create(dot))
-		for p in path:
-			self.play(Create(p))
+			self.play(Create(dot),run_time = 0.5)
+		for idx,p in enumerate(path):
+			self.play(Create(p),rate_func = rate_functions.linear, run_time = 0.5 / (idx + 1))
 			
 		self.wait(1)
 		for edge_group in edge_dots:
-			self.play(Create(
-					VGroup(*[edge_group[0],edge_group[1]])
-				)
-			)
+			self.play(Create(edge_group[0]),Create(edge_group[1]),run_time = 0.35)
 		creation = Create(pipe)
 		creation.set_run_time = 5.0
-		self.play(creation)
+		self.play(creation, run_time = 5)
 		self.wait(2)
 
 
@@ -91,8 +90,8 @@ def get_two_point(p1,p2,p3,width):
 	angle = get_angle_between(vec21,vec23)
 	if round(angle,2) == round(PI,2):
 		return[
-			unit_vector(np.array([-vec21[1],vec21[0],vec21[2]])) * -width / 2 + p2,
-			unit_vector(np.array([-vec21[1],vec21[0],vec21[2]])) * width / 2 + p2
+			unit_vector([-vec21[1],vec21[0],vec21[2]]) * -width / 2.0 + p2,
+			unit_vector([-vec21[1],vec21[0],vec21[2]]) * width / 2.0 + p2
 		]
 	tmp = unit_vector(vec21) + unit_vector(vec23)
 	
@@ -108,9 +107,10 @@ def get_two_point(p1,p2,p3,width):
 	#correct for the side
 	if angle23 < 0:
 		side *= -1
+	
 	return [
-		tmp * side * width / 2 + p2,
-		tmp * side * -width / 2 + p2
+		unit_vector(tmp) * side * width / 2.0 + p2,
+		unit_vector(tmp) * side * -width / 2.0 + p2
 	]
 
 def rotate_vector(vector,rotation):
@@ -124,8 +124,11 @@ def get_inverse(p1,p2):
 	return [ 
 		(p2[0] - p1[0]) * -1 + p1[0],
 		(p2[1] - p1[1]) * -1 + p1[1],
-		0		
+		(p2[2] - p1[2]) * -1 + p1[2]		
 	]
+
+def get_distance(p1,p2):
+	return sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
