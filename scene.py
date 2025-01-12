@@ -6,14 +6,14 @@ class CreateCircle(Scene):
 	def construct(self):
 		
 		pointList = [
-			[-3,-1,0],
+			[-3,-0.5,0],
 			[-1,0,1],
 			[-1,2,2],
 			[1,3,3],
 			[2,1,1],
 			[1.5,-1,3],
 			[-2,-2.5,-1],
-			[-4,-2,0]
+			[-4,-2.25,0]
 		]
 
 		p1 = Dot(point=pointList[0], color=PINK).set_stroke(YELLOW)
@@ -68,7 +68,10 @@ class CreateCircle(Scene):
 		)
 		pipe.fill_color = PURPLE
 		
-		
+		circles = []
+		for pt in pointList:
+			circles.append(Circle(radius=width / 2,color=BLUE).move_to(pt))
+
 
 		for dot in dots:
 			self.play(Create(dot),run_time = 0.5)
@@ -78,22 +81,29 @@ class CreateCircle(Scene):
 		self.wait(1)
 		for edge_group in edge_dots:
 			self.play(Create(edge_group[0]),Create(edge_group[1]),run_time = 0.35)
+		
 		creation = Create(pipe)
 		creation.set_run_time = 5.0
 		self.play(creation, run_time = 5)
 		self.wait(2)
+		self.play(
+			pipe.animate.set_fill(PURPLE,opacity=1)
+		)
 
 
 def get_two_point(p1,p2,p3,width):
 	vec21 = np.subtract(p2,p1)
 	vec23 = np.subtract(p2,p3)
+	uVec21 = unit_vector(vec21)
+	uVec23 = unit_vector(vec23)
+	print(f"21: {sqrt(uVec21[0]**2 + uVec21[1]**2)} 23: {sqrt(uVec23[0]**2 + uVec23[1]**2)} ")
 	angle = get_angle_between(vec21,vec23)
 	if round(angle,2) == round(PI,2):
 		return[
-			unit_vector([-vec21[1],vec21[0],vec21[2]]) * -width / 2.0 + p2,
-			unit_vector([-vec21[1],vec21[0],vec21[2]]) * width / 2.0 + p2
+			unit_vector_2d([-vec21[1],vec21[0],vec21[2]]) * -width / 2.0 + p2,
+			unit_vector_2d([-vec21[1],vec21[0],vec21[2]]) * width / 2.0 + p2
 		]
-	tmp = unit_vector(vec21) + unit_vector(vec23)
+	tmp = unit_vector_2d(vec21) + unit_vector_2d(vec23)
 	
 	angle23 = atan2(vec21[1],vec21[0]) - atan2(vec23[1],vec23[0])
 	
@@ -109,8 +119,8 @@ def get_two_point(p1,p2,p3,width):
 		side *= -1
 	
 	return [
-		unit_vector(tmp) * side * width / 2.0 + p2,
-		unit_vector(tmp) * side * -width / 2.0 + p2
+		unit_vector_2d(tmp) * side * width / 2.0 + p2,
+		unit_vector_2d(tmp) * side * -width / 2.0 + p2
 	]
 
 def rotate_vector(vector,rotation):
@@ -133,7 +143,11 @@ def get_distance(p1,p2):
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
-
+def unit_vector_2d(vector):
+	x,y,z = vector
+	two_d_normal = [x,y,0] / np.linalg.norm([x,y,0])
+	two_d_normal[2] = z
+	return two_d_normal
 def get_angle_between(v1, v2):
     """ Returns the angle in radians between vectors 'v1' and 'v2'::
 
